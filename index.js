@@ -1,8 +1,11 @@
 const express = require('express')
-const morgan = require('morgan')
+
 const app = express()
 app.use(express.json())
-app.use(morgan('tiny'))
+const morgan = require('morgan')
+// app.use(morgan('tiny'))
+morgan.token('body', function (req, res) { return JSON.stringify(req.body) }) // creates custom token
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 
 const PORT = 3001
@@ -61,6 +64,7 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
+    
     const id = Math.floor(Math.random() * 13379)
     const newContact = req.body
     if (newContact.name && newContact.number) {
