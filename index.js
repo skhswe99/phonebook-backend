@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+app.use(express.json())
 const PORT = 3001
 
 let persons = [
@@ -7,22 +8,22 @@ let persons = [
         "id": 1,
         "name": "Arto Hellas",
         "number": "040-123456"
-        },
-        {
+    },
+    {
         "id": 2,
         "name": "Ada Lovelace",
         "number": "39-44-5323523"
-        },
-        {
+    },
+    {
         "id": 3,
         "name": "Dan Abramov",
         "number": "12-43-234345"
-        },
-        {
+    },
+    {
         "id": 4,
         "name": "Mary Poppendieck",
         "number": "39-23-6423122"
-        }
+    }
 ]
 
 app.get('/api/persons', (req, res) => {
@@ -53,6 +54,23 @@ app.delete('/api/persons/:id', (req, res) => {
     } else {
         res.status(404).end()
     }
+})
+
+app.post('/api/persons', (req, res) => {
+    const id = Math.floor(Math.random() * 13379)
+    const newContact = req.body
+    if (newContact.name && newContact.number) {
+        if(persons.find(person => person.name.toLowerCase() === newContact.name.toLowerCase())) {
+            res.status(400).json({error: 'name must be unique'})
+        } else {
+            newContact.id = id
+            persons = [...persons, newContact]
+            res.json(newContact)
+        }
+    } else {
+        res.status(400).json({error: 'both name and number are required'})
+    }
+    
 })
 
 app.listen(PORT, () => {
