@@ -3,6 +3,8 @@ const cors = require('cors')
 const app = express()
 app.use(express.json())
 app.use(cors()) // used to enable cors
+// app.use(express.static('dist')) // serve static file from backend; for vite
+app.use(express.static('build')) // serve static file from backend; for create-react-app
 const morgan = require('morgan')
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) }) // creates custom token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
