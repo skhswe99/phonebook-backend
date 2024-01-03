@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+const mongoose = require('mongoose')
+
 const app = express()
 app.use(express.json())
 app.use(cors()) // used to enable cors
@@ -10,32 +12,51 @@ morgan.token('body', function (req, res) { return JSON.stringify(req.body) }) //
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 const PORT = process.env.PORT || 3001
+const password = process.argv[2] // get password from command line
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
+const personSchema = new mongoose.Schema({
+    name: String,
+    number: String
+})
+
+personSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString()
+        delete returnedObject.id
+        delete returnedObject.__v
     }
-]
+})
+
+const Person = mongoose.model('Person', personSchema)
+
+// let persons = [
+//     {
+//         "id": 1,
+//         "name": "Arto Hellas",
+//         "number": "040-123456"
+//     },
+//     {
+//         "id": 2,
+//         "name": "Ada Lovelace",
+//         "number": "39-44-5323523"
+//     },
+//     {
+//         "id": 3,
+//         "name": "Dan Abramov",
+//         "number": "12-43-234345"
+//     },
+//     {
+//         "id": 4,
+//         "name": "Mary Poppendieck",
+//         "number": "39-23-6423122"
+//     }
+// ]
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    // res.json(persons)
+    Person.find({}).then(persons => {
+        res.json(persons)
+    })
 })
 
 app.get('/info', (req, res) => {
