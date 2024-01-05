@@ -23,6 +23,9 @@ const errorHandler = (err, req, res, next) => {
     next(err)
 }
 
+//**********************
+//* route handlers
+//**********************
 
 app.get('/info', (req, res) => {
     Person.find({})
@@ -31,14 +34,12 @@ app.get('/info', (req, res) => {
         })
 })
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({})
             .then(results => {
                 res.json(results)
             })
-            .catch(error => {
-                console.log(error.message)
-            })
+            .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
@@ -53,17 +54,15 @@ app.get('/api/persons/:id', (req, res, next) => {
             .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
     Person.findByIdAndDelete(req.params.id)
             .then(result => {
                 res.status(204).end()
             })
-            .catch(error => {
-                console.log(error)
-            })
+            .catch(error => next(error))
 })
 
-app.post('/api/persons', (req, res) => { 
+app.post('/api/persons', (req, res, next) => { 
     const body = req.body
     const newPerson = new Person({
         name: body.name,
@@ -74,11 +73,22 @@ app.post('/api/persons', (req, res) => {
              .then(result => {
                 console.log(result)  
              })
-             .catch(error => {
-                console.log(error)
-             })
+             .catch(error => next(error))
 })
 
+app.put('/api/persons/:id', (req, res, next) => {
+    const body = req.body
+    const person = {
+        name: body.name,
+        number: body.number
+    }
+
+    Person.findByIdAndUpdate(req.params.id, person, {new: true})
+            .then(updatedPerson => {
+                res.json(updatedPerson)
+            })
+            .catch(err => next(err))
+})
 
 
 app.use(errorHandler) // use error handler here
