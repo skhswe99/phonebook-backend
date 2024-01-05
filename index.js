@@ -67,10 +67,15 @@ app.get('/api/persons/:id', (req, res) => {
     // }
     Person.findById(req.params.id)
             .then(person => {
-                res.json(person)
+                if (person) {
+                    res.json(person)
+                } else {
+                    res.status(404).end()
+                }                
             })
             .catch(error => {
-                console.log(error.message)
+                console.log(error)
+                res.status(400).send({error: 'malformatted id'})
             })
 })
 
@@ -85,23 +90,36 @@ app.get('/api/persons/:id', (req, res) => {
 //     }
 // })
 
-// app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res) => {
     
-//     const id = Math.floor(Math.random() * 13379)
-//     const newContact = req.body
-//     if (newContact.name && newContact.number) {
-//         if(persons.find(person => person.name.toLowerCase() === newContact.name.toLowerCase())) {
-//             res.status(400).json({error: 'name must be unique'})
-//         } else {
-//             newContact.id = id
-//             persons = [...persons, newContact]
-//             res.json(newContact)
-//         }
-//     } else {
-//         res.status(400).json({error: 'both name and number are required'})
-//     }
+    // const id = Math.floor(Math.random() * 13379)
+    // const newContact = req.body
+    // if (newContact.name && newContact.number) {
+    //     if(persons.find(person => person.name.toLowerCase() === newContact.name.toLowerCase())) {
+    //         res.status(400).json({error: 'name must be unique'})
+    //     } else {
+    //         newContact.id = id
+    //         persons = [...persons, newContact]
+    //         res.json(newContact)
+    //     }
+    // } else {
+    //     res.status(400).json({error: 'both name and number are required'})
+    // }
     
-// })
+    const body = req.body
+    const newPerson = new Person({
+        name: body.name,
+        number: body.number
+    })
+
+    newPerson.save()
+             .then(result => {
+                console.log(result)  
+             })
+             .catch(error => {
+                console.log(error)
+             })
+})
 
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`)
