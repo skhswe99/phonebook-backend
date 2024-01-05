@@ -79,16 +79,23 @@ app.get('/api/persons/:id', (req, res) => {
             })
 })
 
-// app.delete('/api/persons/:id', (req, res) => {
-//     const id = Number(req.params.id)
-//     const deletedPerson = persons.find(person => person.id === id)
-//     if (deletedPerson) {
-//         persons = persons.filter(person => person.id !== id)
-//         res.status(200).end()
-//     } else {
-//         res.status(404).end()
-//     }
-// })
+app.delete('/api/persons/:id', (req, res) => {
+    // const id = Number(req.params.id)
+    // const deletedPerson = persons.find(person => person.id === id)
+    // if (deletedPerson) {
+    //     persons = persons.filter(person => person.id !== id)
+    //     res.status(200).end()
+    // } else {
+    //     res.status(404).end()
+    // }
+    Person.findByIdAndDelete(req.params.id)
+            .then(result => {
+                res.status(204).end()
+            })
+            .catch(error => {
+                console.log(error)
+            })
+})
 
 app.post('/api/persons', (req, res) => {
     
@@ -114,7 +121,8 @@ app.post('/api/persons', (req, res) => {
 
     newPerson.save()
              .then(result => {
-                console.log(result)  
+                console.log(result)
+                 
              })
              .catch(error => {
                 console.log(error)
