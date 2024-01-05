@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
+const Person = require('./models/person')
 
 const app = express()
 app.use(express.json())
@@ -11,23 +13,8 @@ const morgan = require('morgan')
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) }) // creates custom token
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
-const PORT = process.env.PORT || 3001
-const password = process.argv[2] // get password from command line
+const PORT = process.env.PORT
 
-const personSchema = new mongoose.Schema({
-    name: String,
-    number: String
-})
-
-personSchema.set('toJSON', {
-    transform: (document, returnedObject) => {
-        returnedObject.id = returnedObject._id.toString()
-        delete returnedObject.id
-        delete returnedObject.__v
-    }
-})
-
-const Person = mongoose.model('Person', personSchema)
 
 // let persons = [
 //     {
@@ -52,55 +39,69 @@ const Person = mongoose.model('Person', personSchema)
 //     }
 // ]
 
-app.get('/api/persons', (req, res) => {
-    // res.json(persons)
-    Person.find({}).then(persons => {
-        res.json(persons)
-    })
+app.get('/info', (req, res) => {
+    Person.find({})
+        .then(result => {
+            res.send(`<p>Phoneboook has info for ${result.length} people</p>${new Date().toString()}`)
+        })
+    // res.send(`<p>Phoneboook has info for ${persons.length} people</p>${new Date().toString()}`)
 })
 
-app.get('/info', (req, res) => {
-    res.send(`<p>Phoneboook has info for ${persons.length} people</p>${new Date().toString()}`)
+app.get('/api/persons', (req, res) => {
+    Person.find({})
+            .then(results => {
+                res.json(results)
+            })
+            .catch(error => {
+                console.log(error.message)
+            })
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(person => person.id === id)
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+    // const id = Number(req.params.id)
+    // const person = persons.find(person => person.id === id)
+    // if (person) {
+    //     res.json(person)
+    // } else {
+    //     res.status(404).end()
+    // }
+    Person.findById(req.params.id)
+            .then(person => {
+                res.json(person)
+            })
+            .catch(error => {
+                console.log(error.message)
+            })
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const deletedPerson = persons.find(person => person.id === id)
-    if (deletedPerson) {
-        persons = persons.filter(person => person.id !== id)
-        res.status(200).end()
-    } else {
-        res.status(404).end()
-    }
-})
+// app.delete('/api/persons/:id', (req, res) => {
+//     const id = Number(req.params.id)
+//     const deletedPerson = persons.find(person => person.id === id)
+//     if (deletedPerson) {
+//         persons = persons.filter(person => person.id !== id)
+//         res.status(200).end()
+//     } else {
+//         res.status(404).end()
+//     }
+// })
 
-app.post('/api/persons', (req, res) => {
+// app.post('/api/persons', (req, res) => {
     
-    const id = Math.floor(Math.random() * 13379)
-    const newContact = req.body
-    if (newContact.name && newContact.number) {
-        if(persons.find(person => person.name.toLowerCase() === newContact.name.toLowerCase())) {
-            res.status(400).json({error: 'name must be unique'})
-        } else {
-            newContact.id = id
-            persons = [...persons, newContact]
-            res.json(newContact)
-        }
-    } else {
-        res.status(400).json({error: 'both name and number are required'})
-    }
+//     const id = Math.floor(Math.random() * 13379)
+//     const newContact = req.body
+//     if (newContact.name && newContact.number) {
+//         if(persons.find(person => person.name.toLowerCase() === newContact.name.toLowerCase())) {
+//             res.status(400).json({error: 'name must be unique'})
+//         } else {
+//             newContact.id = id
+//             persons = [...persons, newContact]
+//             res.json(newContact)
+//         }
+//     } else {
+//         res.status(400).json({error: 'both name and number are required'})
+//     }
     
-})
+// })
 
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`)
